@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,height=device-height,initial-scale=1.0,user-scalable=no">
+<title>Planning TV</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    width:100vw;
+    height:100vh;
+    font-family:Segoe UI,Arial,sans-serif;
+    background:#f4f7fb;
+    overflow:hidden;
+}
+
+/* ===== LAYOUT GLOBAL ===== */
+body{
+    display:grid;
+    grid-template-rows:11vh 1fr;
+}
+
+/* ===== HEADER ===== */
+.header{
+    background:#0d9488;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:3.4vh;
+    font-weight:600;
+}
+
+/* ===== CONTENU ===== */
+.main{
+    display:grid;
+    grid-template-rows:1fr 1fr;
+    gap:1.8vh;
+    padding:1.8vh;
+}
+
+/* ===== SECTIONS ===== */
+.section{
+    background:white;
+    border-radius:1.5vh;
+    box-shadow:0 0.6vh 1.6vh rgba(0,0,0,.12);
+    display:grid;
+    grid-template-rows:auto 1fr;
+    overflow:hidden;
+}
+
+.section h2{
+    margin:0;
+    padding:1.2vh 2.5vh;
+    background:#1e3a8a;
+    color:white;
+    font-size:2.8vh;
+    font-weight:600;
+}
+
+/* ===== TABLE ===== */
+table{
+    width:100%;
+    height:100%;
+    border-collapse:collapse;
+}
+
+tbody{
+    display:grid;
+    grid-template-rows:repeat(8, 1fr);
+}
+
+tr{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:center;
+    border-bottom:1px solid #e5e7eb;
+}
+
+/* ===== TEXTE ===== */
+td{
+    padding:0 2.5vh;
+    font-size:2.6vh;
+    font-weight:500;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+td:last-child{
+    font-size:2.9vh;
+    font-weight:700;
+    color:#15803d;
+    min-width:6vh;
+    text-align:right;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ✅ TITRE CORRIGÉ -->
+<div class="header">
+    Planning du {{ date }}
+    {% if not is_today %}
+        (prochain jour de cours)
+    {% endif %}
+</div>
+
+<div class="main">
+
+<!-- MATIN -->
+<div class="section">
+<h2>Matin</h2>
+<table>
+<tbody>
+{% for formation, salle in matin.items() %}
+<tr>
+    <td>{{ formation }}</td>
+    <td>{{ salle }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<!-- APRES-MIDI -->
+<div class="section">
+<h2>Après-midi</h2>
+<table>
+<tbody>
+{% for formation, salle in apresmidi.items() %}
+<tr>
+    <td>{{ formation }}</td>
+    <td>{{ salle }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+/* Plein écran auto */
+document.documentElement.requestFullscreen().catch(()=>{});
+
+/* Double clic */
+document.addEventListener("dblclick", () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(()=>{});
+    }
+});
+
+/* Échap */
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && document.fullscreenElement) {
+        document.exitFullscreen();
+    }
+});
+
+/* Rafraîchissement auto */
+setTimeout(() => location.reload(), 5 * 60 * 1000);
+</script>
+
+</body>
+</html>

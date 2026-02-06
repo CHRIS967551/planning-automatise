@@ -1,0 +1,53 @@
+{
+  "MCO 1": {
+    "effectif": 15
+  },
+  "NDRC 1": {
+    "effectif": 9
+  },
+  "CJN 1": {
+    "effectif": 10
+  },
+  "SP3S 1": {
+    "effectif": 13
+  },
+  "ASSU 1": {
+    "effectif": 6
+  },
+  "SIO 1": {
+    "effectif": 10
+  },
+  "MCO 2": {
+    "effectif": 20
+  },
+  "NDRC 2": {
+    "effectif": 13
+  },
+  "CJN 2": {
+    "effectif": 6
+  },
+  "SP3S 2": {
+    "effectif": 9
+  },
+  "ASSU 2": {
+    "effectif": 4
+  },
+  "SIO 2 SLAM": {
+    "effectif": 5
+  },
+  "SIO 2 SISR": {
+    "effectif": 4
+  },
+  "BQ 2": {
+    "effectif": 3
+  },
+  "LGCVM": {
+    "effectif": 24
+  },
+  "LPMN": {
+    "effectif": 15
+  },
+  "LPMN 1": {
+    "effectif": 0
+  }
+}

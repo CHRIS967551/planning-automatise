@@ -1,0 +1,19 @@
+{
+  "SIO 2 SLAM": true,
+  "MCO 1": false,
+  "NDRC 1": false,
+  "CJN 1": false,
+  "SP3S 1": false,
+  "ASSU 1": false,
+  "SIO 1": false,
+  "MCO 2": false,
+  "NDRC 2": false,
+  "CJN 2": false,
+  "SP3S 2": false,
+  "ASSU 2": false,
+  "SIO 2 SISR": false,
+  "BQ 2": false,
+  "LGCVM": false,
+  "LPMN": false,
+  "LPMN 1": false
+}

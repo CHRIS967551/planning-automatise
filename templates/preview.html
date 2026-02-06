@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Prévisualisation – Prochains cours</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI, Arial, sans-serif;
+    background:#f4f7fb;
+    padding:30px;
+}
+
+h1{
+    color:#1e5fa8;
+}
+
+.section{
+    background:white;
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:30px;
+    box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.section h2{
+    margin-top:0;
+    background:#1e3a8a;
+    color:white;
+    padding:12px;
+    border-radius:10px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:12px;
+    border-bottom:1px solid #eee;
+    font-size:16px;
+}
+
+th{
+    text-align:left;
+}
+
+input{
+    padding:6px 10px;
+    width:120px;
+    font-size:16px;
+}
+
+button{
+    padding:12px 24px;
+    font-size:16px;
+    background:#0d9488;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#0f766e;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Prévisualisation – {{ date }}</h1>
+
+<!--  SÉLECTEUR DE DATE -->
+<form method="get" style="margin-bottom:25px;">
+    <label for="date"><strong>Choisir une date :</strong></label>
+    <input type="date"
+           id="date"
+           name="date"
+           value="{{ date }}"
+           onchange="this.form.submit()">
+</form>
+
+
+<form method="POST">
+
+<!-- ===== MATIN ===== -->
+<div class="section">
+<h2>Matin</h2>
+<table>
+<tr>
+    <th>Formation</th>
+    <th>Salle</th>
+</tr>
+
+{% for c in matin %}
+<tr>
+    <td>{{ c.formation }}</td>
+    <td>
+        <input type="text"
+               name="{{ c.date }}|{{ c.formation }}"
+               value="{{ c.salle or '' }}">
+    </td>
+</tr>
+{% endfor %}
+</table>
+</div>
+
+<!-- ===== APRES-MIDI ===== -->
+<div class="section">
+<h2>Après-midi</h2>
+<table>
+<tr>
+    <th>Formation</th>
+    <th>Salle</th>
+</tr>
+
+{% for c in apresmidi %}
+<tr>
+    <td>{{ c.formation }}</td>
+    <td>
+        <input type="text"
+               name="{{ c.date }}|{{ c.formation }}"
+               value="{{ c.salle or '' }}">
+    </td>
+</tr>
+{% endfor %}
+</table>
+</div>
+
+<button type="submit"> Enregistrer les modifications</button>
+
+</form>
+
+</body>
+</html>

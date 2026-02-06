@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>État des imports</title>
+<style>
+body{
+    font-family:Segoe UI, Arial;
+    background:#f4f7fb;
+    padding:40px;
+}
+table{
+    width:400px;
+    border-collapse:collapse;
+    background:white;
+    box-shadow:0 10px 20px rgba(0,0,0,0.1);
+}
+th,td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+}
+.ok{color:green;font-weight:bold}
+.ko{color:red;font-weight:bold}
+</style>
+</head>
+<body>
+
+<h1>📊 État des imports</h1>
+
+<table>
+<tr><th>Formation</th><th>Statut</th></tr>
+
+{% for f in rapport %}
+<tr>
+<td>{{ f.formation }}</td>
+<td class="{{ 'ok' if f.statut=='OK' else 'ko' }}">{{ f.statut }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>
