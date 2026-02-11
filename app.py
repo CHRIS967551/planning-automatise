@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 from datetime import date, datetime
 import os, csv, json
 
 app = Flask(__name__)
+app.secret_key = "change_this_super_secret_key"
 
 # ======================
 # PATHS
@@ -392,6 +393,9 @@ def parser_csv(path, formation):
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    if not session.get("admin"):
+        return redirect("/login")
+
     base = annee_path()
     cours_path = os.path.join(base, "cours_planifies.json")
     cours = safe_json(cours_path, [])
@@ -458,6 +462,9 @@ def index():
 
 @app.route("/preview", methods=["GET", "POST"])
 def preview():
+    if not session.get("admin"):
+        return redirect("/login")
+
     base = annee_path()
     cours_path = os.path.join(base, "cours_planifies.json")
     cours = safe_json(cours_path, [])
@@ -626,6 +633,9 @@ def tv():
 
 @app.route("/formations/add", methods=["POST"])
 def formations_add():
+    if not session.get("admin"):
+        return redirect("/login")
+
     base = annee_path()
     nom = request.form.get("nom", "").strip()
     effectif_str = request.form.get("effectif", "0")
@@ -665,6 +675,9 @@ def formations_add():
 
 @app.route("/formations/delete", methods=["POST"])
 def formations_delete():
+    if not session.get("admin"):
+        return redirect("/login")
+
     base = annee_path()
     nom = request.form.get("nom", "").strip()
     
@@ -702,6 +715,9 @@ def formations_delete():
 
 @app.route("/effectifs", methods=["POST"])
 def effectifs():
+    if not session.get("admin"):
+        return redirect("/login")
+
     base = annee_path()
     effectifs_path = os.path.join(base, "effectifs.json")
     
@@ -726,6 +742,9 @@ def effectifs():
 
 @app.route("/accessibilite", methods=["POST"])
 def accessibilite():
+    if not session.get("admin"):
+        return redirect("/login")
+
     base = annee_path()
     access_path = os.path.join(base, "accessibilite.json")
     
@@ -762,6 +781,27 @@ def reset_imports():
             os.remove(os.path.join(IMPORTS, fichier))
 
     return redirect("/")
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        password = request.form.get("password")
+
+        if password == os.environ.get("ADMIN_PASSWORD", "admin123"):
+            session["admin"] = True
+            return redirect("/")
+        else:
+            return render_template("login.html", error="Mot de passe incorrect")
+
+    return render_template("login.html", error=None)
+
+
+@app.route("/logout")
+def logout():
+    session.pop("admin", None)
+    return redirect("/login")
+
 
 
 # ======================
