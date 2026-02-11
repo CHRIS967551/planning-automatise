@@ -187,6 +187,23 @@ body{
     </form>
 </div>
 
+<form method="POST" action="/admin/reset_imports"
+      onsubmit="return confirm('Confirmer la réinitialisation ?');">
+
+    <button style="
+        background:#dc2626;
+        color:white;
+        padding:12px 24px;
+        border:none;
+        border-radius:8px;
+        font-size:16px;
+        cursor:pointer;">
+         Réinitialiser les imports CSV
+    </button>
+
+</form>
+
+
 <!-- FORMATIONS + ACCESS -->
 <div class="two-cols">
 
@@ -243,6 +260,7 @@ body{
 </div>
 
 </div>
+
 
 <script>
 document.querySelectorAll('#access-form input').forEach(cb=>{

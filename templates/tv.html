@@ -13,14 +13,14 @@ html,body{
     width:100vw;
     height:100vh;
     font-family:Segoe UI,Arial,sans-serif;
-    background:#f4f7fb;
+    background:#ffffff;
     overflow:hidden;
 }
 
-/* ===== LAYOUT GLOBAL ===== */
+/* ===== LAYOUT ===== */
 body{
     display:grid;
-    grid-template-rows:11vh 1fr;
+    grid-template-rows:12vh 1fr;
 }
 
 /* ===== HEADER ===== */
@@ -30,35 +30,14 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:3.4vh;
-    font-weight:600;
+    font-size:3.6vh;
+    font-weight:700;
+    letter-spacing:.1vh;
 }
 
-/* ===== CONTENU ===== */
-.main{
-    display:grid;
-    grid-template-rows:1fr 1fr;
-    gap:1.8vh;
-    padding:1.8vh;
-}
-
-/* ===== SECTIONS ===== */
-.section{
-    background:white;
-    border-radius:1.5vh;
-    box-shadow:0 0.6vh 1.6vh rgba(0,0,0,.12);
-    display:grid;
-    grid-template-rows:auto 1fr;
-    overflow:hidden;
-}
-
-.section h2{
-    margin:0;
-    padding:1.2vh 2.5vh;
-    background:#1e3a8a;
-    color:white;
-    font-size:2.8vh;
-    font-weight:600;
+/* ===== TABLE CONTAINER ===== */
+.container{
+    padding:2vh;
 }
 
 /* ===== TABLE ===== */
@@ -66,43 +45,63 @@ table{
     width:100%;
     height:100%;
     border-collapse:collapse;
+    background:white;
+    box-shadow:0 1vh 2vh rgba(0,0,0,.12);
 }
 
-tbody{
-    display:grid;
-    grid-template-rows:repeat(8, 1fr);
+/* HEADER ROW */
+thead{
+    background:#1e3a8a;
+    color:white;
 }
 
-tr{
-    display:grid;
-    grid-template-columns:1fr auto;
-    align-items:center;
-    border-bottom:1px solid #e5e7eb;
-}
-
-/* ===== TEXTE ===== */
-td{
-    padding:0 2.5vh;
-    font-size:2.6vh;
-    font-weight:500;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-td:last-child{
-    font-size:2.9vh;
+thead th{
+    padding:2vh;
+    font-size:3vh;
     font-weight:700;
-    color:#15803d;
-    min-width:6vh;
-    text-align:right;
+    text-align:center;
+    border:3px solid #1e3a8a;
+}
+
+/* BODY */
+tbody tr{
+    height:7vh;
+}
+
+/* Alternance gris plus marquée */
+tbody tr:nth-child(odd){
+    background:#ffffff;
+}
+
+tbody tr:nth-child(even){
+    background:#cfd4dc;
+}
+
+tbody td{
+    font-size:2.8vh;
+    font-weight:600;
+    padding:1vh 2vh;
+    text-align:center;
+    border:3px solid #d1d5db;
+}
+
+/* FORMATION COLUMN */
+tbody td:first-child{
+    text-align:left;
+    padding-left:3vh;
+    font-weight:700;
+}
+
+/* EMPTY CELL STYLE */
+.empty{
+    color:#6b7280;
+    font-weight:600;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ✅ TITRE CORRIGÉ -->
 <div class="header">
     Planning du {{ date }}
     {% if not is_today %}
@@ -110,59 +109,63 @@ td:last-child{
     {% endif %}
 </div>
 
-<div class="main">
+<div class="container">
 
-<!-- MATIN -->
-<div class="section">
-<h2>Matin</h2>
 <table>
+<thead>
+<tr>
+    <th>Formations</th>
+    <th>Matin</th>
+    <th>Après-midi</th>
+</tr>
+</thead>
+
 <tbody>
-{% for formation, salle in matin.items() %}
+
+{% set formations_matin = matin.keys()|list %}
+{% set formations_apres = apresmidi.keys()|list %}
+{% set toutes_formations = formations_matin + formations_apres %}
+
+{% for formation in toutes_formations|unique %}
 <tr>
     <td>{{ formation }}</td>
-    <td>{{ salle }}</td>
+    <td>
+        {% if formation in matin %}
+            {{ matin[formation] }}
+        {% else %}
+            <span class="empty">Ø</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if formation in apresmidi %}
+            {{ apresmidi[formation] }}
+        {% else %}
+            <span class="empty">Ø</span>
+        {% endif %}
+    </td>
 </tr>
 {% endfor %}
-</tbody>
-</table>
-</div>
 
-<!-- APRES-MIDI -->
-<div class="section">
-<h2>Après-midi</h2>
-<table>
-<tbody>
-{% for formation, salle in apresmidi.items() %}
-<tr>
-    <td>{{ formation }}</td>
-    <td>{{ salle }}</td>
-</tr>
-{% endfor %}
 </tbody>
 </table>
-</div>
 
 </div>
 
 <script>
-/* Plein écran auto */
 document.documentElement.requestFullscreen().catch(()=>{});
 
-/* Double clic */
 document.addEventListener("dblclick", () => {
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(()=>{});
     }
 });
 
-/* Échap */
 document.addEventListener("keydown", e => {
     if (e.key === "Escape" && document.fullscreenElement) {
         document.exitFullscreen();
     }
 });
 
-/* Rafraîchissement auto */
 setTimeout(() => location.reload(), 5 * 60 * 1000);
 </script>
 

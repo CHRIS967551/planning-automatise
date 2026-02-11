@@ -1,6 +1,13 @@
 from flask import Flask, render_template, request, redirect
 from datetime import date, datetime
 import os, csv, json
+import locale
+
+# 🔵 Activer la locale française pour les dates
+try:
+    locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
+except:
+    locale.setlocale(locale.LC_TIME, "French_France")
 
 app = Flask(__name__)
 
@@ -290,6 +297,31 @@ MOIS = {
     "OCT.": "10",
     "NOV.": "11",
     "DÉC.": "12", "DEC.": "12"
+}
+
+MOIS_FR = {
+    1: "Janvier",
+    2: "Février",
+    3: "Mars",
+    4: "Avril",
+    5: "Mai",
+    6: "Juin",
+    7: "Juillet",
+    8: "Août",
+    9: "Septembre",
+    10: "Octobre",
+    11: "Novembre",
+    12: "Décembre"
+}
+
+JOURS_FR = {
+    0: "Lundi",
+    1: "Mardi",
+    2: "Mercredi",
+    3: "Jeudi",
+    4: "Vendredi",
+    5: "Samedi",
+    6: "Dimanche"
 }
 
 
@@ -594,7 +626,7 @@ def tv():
 
     return render_template(
         "tv.html",
-        date=jour.isoformat(),
+        date=f"{JOURS_FR[jour.weekday()]} {jour.day:02d} {MOIS_FR[jour.month]} {jour.year}",
         matin=matin,
         apresmidi=apresmidi,
         is_today=(jour == today)
@@ -728,6 +760,23 @@ def accessibilite():
         json.dump(access, f, indent=2)
     
     return {"status": "ok"}
+
+@app.route("/admin/reset_imports", methods=["POST"])
+def reset_imports():
+    base = annee_path()
+
+    # 🔹 Vider cours_planifies.json
+    cours_path = os.path.join(base, "cours_planifies.json")
+    with open(cours_path, "w", encoding="utf-8") as f:
+        json.dump([], f, indent=2)
+
+    # 🔹 Supprimer les CSV du dossier imports
+    for fichier in os.listdir(IMPORTS):
+        if fichier.endswith(".csv"):
+            os.remove(os.path.join(IMPORTS, fichier))
+
+    return redirect("/")
+
 
 # ======================
 # RUN
