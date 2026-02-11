@@ -1,13 +1,6 @@
 from flask import Flask, render_template, request, redirect
 from datetime import date, datetime
 import os, csv, json
-import locale
-
-# 🔵 Activer la locale française pour les dates
-try:
-    locale.setlocale(locale.LC_TIME, "fr_FR.UTF-8")
-except:
-    locale.setlocale(locale.LC_TIME, "French_France")
 
 app = Flask(__name__)
 
@@ -299,30 +292,6 @@ MOIS = {
     "DÉC.": "12", "DEC.": "12"
 }
 
-MOIS_FR = {
-    1: "Janvier",
-    2: "Février",
-    3: "Mars",
-    4: "Avril",
-    5: "Mai",
-    6: "Juin",
-    7: "Juillet",
-    8: "Août",
-    9: "Septembre",
-    10: "Octobre",
-    11: "Novembre",
-    12: "Décembre"
-}
-
-JOURS_FR = {
-    0: "Lundi",
-    1: "Mardi",
-    2: "Mercredi",
-    3: "Jeudi",
-    4: "Vendredi",
-    5: "Samedi",
-    6: "Dimanche"
-}
 
 
 def parser_csv(path, formation):
@@ -582,10 +551,6 @@ def tv():
     cours = safe_json(os.path.join(base, "cours_planifies.json"), [])
     today = date.today()
 
-    salles = charger_salles()
-    effectifs = safe_json(os.path.join(base, "effectifs.json"), {})
-    access = safe_json(os.path.join(base, "accessibilite.json"), {})
-
     # regroupement par date
     par_date = {}
     for c in cours:
@@ -597,12 +562,12 @@ def tv():
 
     jours = sorted(par_date)
 
-    # 🔎 logique correcte :
+    # 🔎 logique :
     # - aujourd’hui s’il y a cours
     # - sinon prochain jour de cours
     jour = today if today in jours else next((d for d in jours if d > today), None)
 
-    # 🔒 sécurité absolue (évite le crash isoformat)
+    # 🔒 sécurité si aucun cours
     if jour is None:
         return render_template(
             "tv.html",
@@ -612,25 +577,46 @@ def tv():
             is_today=False
         )
 
+    # =========================
+    # FORMAT DATE FRANÇAISE
+    # =========================
+    jours_fr = [
+        "lundi", "mardi", "mercredi", "jeudi",
+        "vendredi", "samedi", "dimanche"
+    ]
+
+    mois_fr = [
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+    ]
+
+    date_formatee = f"{jours_fr[jour.weekday()]} {jour.day:02d} {mois_fr[jour.month - 1]} {jour.year}"
+
+    # =========================
+    # MATIN / APRÈS-MIDI
+    # =========================
     matin, apresmidi = {}, {}
 
     for c in par_date.get(jour, []):
         debut = to_minutes(c["heure_debut"])
         fin = to_minutes(c["heure_fin"])
 
+        # Matin
         if debut < 12 * 60 + 30 and fin > 8 * 60 + 30:
             matin[c["formation"]] = c["salle"] or "—"
 
+        # Après-midi
         if debut < 17 * 60 + 30 and fin > 13 * 60 + 30:
             apresmidi[c["formation"]] = c["salle"] or "—"
 
     return render_template(
         "tv.html",
-        date=f"{JOURS_FR[jour.weekday()]} {jour.day:02d} {MOIS_FR[jour.month]} {jour.year}",
+        date=date_formatee,
         matin=matin,
         apresmidi=apresmidi,
         is_today=(jour == today)
     )
+
 
 
 
