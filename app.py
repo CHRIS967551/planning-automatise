@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for
 from datetime import date, datetime
 import os, csv, json
 
 app = Flask(__name__)
 app.secret_key = "change_this_super_secret_key"
+app.secret_key = "cle-secrete-super-admin-2026"
 
 # ======================
 # PATHS
@@ -796,11 +797,11 @@ def login():
 
     return render_template("login.html", error=None)
 
-
 @app.route("/logout")
 def logout():
     session.pop("admin", None)
     return redirect("/login")
+
 
 
 
