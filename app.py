@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, url_for
 from datetime import date, datetime
-import os, csv, json
+import os, csv, json, io
 
 app = Flask(__name__)
 app.secret_key = "change_this_super_secret_key"
@@ -387,6 +387,79 @@ def parser_csv(path, formation):
 
     return cours
 
+def charger_anniversaires():
+    path = os.path.join(IMPORTS, "anniversaires.csv")
+
+    if not os.path.exists(path):
+        return []
+
+    abreviations = {
+        "MANAGEMENT COMMERCIAL OPÉRATIONNEL": "MCO",
+        "NÉGOCIATION ET DIGITALISATION DE LA RELATION CLIENT": "NDRC",
+        "COLLABORATEUR JURISTE NOTARIAL": "CJN",
+        "ASSURANCE": "ASS",
+        "SERVICE ET PRESTATION DES SECTEURS SANITAIRE ET SOCIAL": "SP3S",
+        "SERVICES INFORMATIQUES AUX ORGANISATION": "SIO",
+        "SERVICES INFORMATIQUES AUX ORGANISATION OPTION SLAM": "SIO SLAM",
+        "SERVICES INFORMATIQUES AUX ORGANISATION OPTION SISR": "SIO SISR",
+        "BANQUE": "BANQUE",
+        "LICENCE GÉNÉRALE COMMERCE, VENTE ET MARKETING": "LG CVM",
+        "LICENCE PROFESSIONNELLE MÉTIERS DU NOTARIAT": "LPMN"
+    }
+
+    anniversaires = []
+
+    with open(path, encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f, delimiter=";")
+
+        for row in reader:
+            try:
+                formation_long = row.get("FORMATION", "").strip().upper()
+                formation_abbr = abreviations.get(formation_long, formation_long)
+
+                annee_raw = row.get("ANNÉE DE FORMATION", "").strip().upper()
+
+                # Extraction du numéro d'année
+                if "1" in annee_raw:
+                    annee_num = "1"
+                elif "2" in annee_raw:
+                    annee_num = "2"
+                elif "3" in annee_raw:
+                    annee_num = "3"
+                else:
+                    annee_num = ""
+
+                formation_finale = f"{formation_abbr} {annee_num}".strip()
+
+                nom = row.get("NOM", "").strip()
+                prenom = row.get("PRENOM", "").strip()
+                date_str = row.get("DATE DE NAISSANCE", "").strip()
+
+                if not date_str:
+                    continue
+
+                # Gestion des deux formats de date
+                try:
+                    d = datetime.strptime(date_str, "%d/%m/%Y")
+                except:
+                    d = datetime.strptime(date_str, "%Y-%m-%d")
+
+                anniversaires.append({
+                    "formation": formation_finale,
+                    "annee": annee_num,
+                    "nom": nom,
+                    "prenom": prenom,
+                    "date": d.strftime("%Y-%m-%d")
+                })
+
+            except Exception as e:
+                print("Erreur anniversaire:", row, e)
+
+    return anniversaires
+
+
+   
+
 
 # ======================
 # INDEX
@@ -616,12 +689,28 @@ def tv():
         # Après-midi
         if debut < 17 * 60 + 30 and fin > 13 * 60 + 30:
             apresmidi[c["formation"]] = c["salle"] or "—"
+    
+    #  ANNIVERSAIRES
+    anniversaires = charger_anniversaires()
+    anniv_du_jour = []
+
+    for a in anniversaires:
+        try:
+            d = datetime.strptime(a["date"], "%Y-%m-%d").date()
+            if d.day == jour.day and d.month == jour.month:
+                anniv_du_jour.append(a)
+        except:
+            continue
+    print("DATE TV :", jour)
+    print("ANNIVERSAIRES CHARGES :", anniversaires)
+    print("ANNIVERSAIRES DU JOUR :", anniv_du_jour)
 
     return render_template(
         "tv.html",
         date=date_formatee,
         matin=matin,
         apresmidi=apresmidi,
+        anniversaires=anniv_du_jour,
         is_today=(jour == today)
     )
 
@@ -782,6 +871,23 @@ def reset_imports():
             os.remove(os.path.join(IMPORTS, fichier))
 
     return redirect("/")
+
+@app.route("/admin/import_anniversaires", methods=["POST"])
+def import_anniversaires():
+    file = request.files.get("anniversaires_csv")
+
+    if not file:
+        return "Aucun fichier sélectionné", 400
+
+    csv_path = os.path.join(IMPORTS, "anniversaires.csv")
+
+    file.save(csv_path)
+
+    print("Fichier anniversaires sauvegardé dans imports.")
+
+    return redirect("/")
+
+
 
 
 @app.route("/login", methods=["GET", "POST"])

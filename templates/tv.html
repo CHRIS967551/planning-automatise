@@ -17,7 +17,6 @@ html,body{
     overflow:hidden;
 }
 
-/* ===== LAYOUT ===== */
 body{
     display:grid;
     grid-template-rows:12vh 1fr;
@@ -35,12 +34,9 @@ body{
     letter-spacing:.1vh;
 }
 
-/* ===== TABLE CONTAINER ===== */
-.container{
-    padding:2vh;
-}
-
 /* ===== TABLE ===== */
+.container{ padding:2vh; }
+
 table{
     width:100%;
     height:100%;
@@ -49,7 +45,6 @@ table{
     box-shadow:0 1vh 2vh rgba(0,0,0,.12);
 }
 
-/* HEADER ROW */
 thead{
     background:#1e3a8a;
     color:white;
@@ -63,19 +58,10 @@ thead th{
     border:3px solid #1e3a8a;
 }
 
-/* BODY */
-tbody tr{
-    height:7vh;
-}
+tbody tr{ height:7vh; }
 
-/* Alternance gris plus marquée */
-tbody tr:nth-child(odd){
-    background:#ffffff;
-}
-
-tbody tr:nth-child(even){
-    background:#cfd4dc;
-}
+tbody tr:nth-child(odd){ background:#ffffff; }
+tbody tr:nth-child(even){ background:#cfd4dc; }
 
 tbody td{
     font-size:2.8vh;
@@ -85,18 +71,114 @@ tbody td{
     border:3px solid #d1d5db;
 }
 
-/* FORMATION COLUMN */
 tbody td:first-child{
     text-align:left;
     padding-left:3vh;
     font-weight:700;
 }
 
-/* EMPTY CELL STYLE */
 .empty{
     color:#6b7280;
     font-weight:600;
 }
+
+/* ================= ANNIVERSAIRE ================= */
+
+#anniv-screen {
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow:hidden;
+}
+
+/* Logo géant arrière-plan */
+.birthday-logo-bg {
+    position:absolute;
+    inset:0;
+    background: url("{{ url_for('static', filename='logo.png') }}") center center no-repeat;
+    background-size: 70vh;
+    opacity: 0.1;
+    z-index:1;
+    pointer-events:none;
+}
+
+/* Halo lumineux */
+.birthday-bg {
+    position:absolute;
+    inset:0;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent 60%),
+                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.15), transparent 60%);
+    animation: pulseBg 6s infinite alternate;
+    z-index:2;
+}
+
+@keyframes pulseBg {
+    from { transform: scale(1); opacity:0.7; }
+    to   { transform: scale(1.2); opacity:1; }
+}
+
+/* Contenu */
+.birthday-content {
+    position:relative;
+    text-align:center;
+    color:white;
+    z-index:3;
+    animation: fadeZoom 1.2s ease forwards;
+}
+
+@keyframes fadeZoom {
+    from { opacity:0; transform:scale(0.8); }
+    to { opacity:1; transform:scale(1); }
+}
+
+.birthday-title {
+    font-size:4vh;
+    font-weight:700;
+    line-height:1.4;
+    margin-bottom:4vh;
+}
+
+.birthday-title span {
+    font-size:6vh;
+    display:block;
+    color:#facc15;
+    text-shadow:0 0 20px rgba(255,255,255,0.6);
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow:0 0 10px #fff; }
+    to { text-shadow:0 0 30px #fff; }
+}
+
+.birthday-name {
+    font-size:7vh;
+    font-weight:800;
+    margin-top:2vh;
+    animation: popName 1s ease;
+}
+
+@keyframes popName {
+    0% { transform:scale(0); opacity:0; }
+    80% { transform:scale(1.2); }
+    100% { transform:scale(1); opacity:1; }
+}
+
+/* Confettis */
+#confetti-canvas {
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:4;
+}
+.birthday-formation {
+    font-size: 3vh;
+    margin-top: 1vh;
+    opacity: 0.9;
+    font-weight: 600;
+}
+
 </style>
 </head>
 
@@ -111,6 +193,35 @@ tbody td:first-child{
 
 <div class="container">
 
+<div id="anniv-screen"
+     data-count="{{ anniversaires|length }}"
+     style="display:none; height:100%; position:relative;">
+
+    <div class="birthday-logo-bg"></div>
+    <div class="birthday-bg"></div>
+
+    <div class="birthday-content">
+        <div class="birthday-title">
+            ICFA CAMPUS SAINT FRANCOIS<br>
+            VOUS SOUHAITE UN<br>
+            <span>JOYEUX ANNIVERSAIRE</span>
+        </div>
+
+        {% for a in anniversaires %}
+            <div class="birthday-name">
+                {{ a.prenom }} {{ a.nom }}
+                <div class="birthday-formation">
+                    {{ a.formation }}
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+
+    <canvas id="confetti-canvas"></canvas>
+</div>
+
+<div id="planning" style="height:100%;">
 <table>
 <thead>
 <tr>
@@ -119,7 +230,6 @@ tbody td:first-child{
     <th>Après-midi</th>
 </tr>
 </thead>
-
 <tbody>
 
 {% set formations_matin = matin.keys()|list %}
@@ -148,25 +258,80 @@ tbody td:first-child{
 
 </tbody>
 </table>
-
+</div>
 </div>
 
 <script>
 document.documentElement.requestFullscreen().catch(()=>{});
 
-document.addEventListener("dblclick", () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(()=>{});
-    }
-});
+const annivScreen = document.getElementById("anniv-screen");
+const anniversairesCount = parseInt(annivScreen.dataset.count || "0", 10);
+const hasAnniversaire = anniversairesCount > 0;
 
-document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && document.fullscreenElement) {
-        document.exitFullscreen();
-    }
-});
+const planning = document.getElementById("planning");
 
-setTimeout(() => location.reload(), 5 * 60 * 1000);
+const DUREE_PLANNING = 10000;
+const DUREE_ANNIV = 5000;
+
+let currentTimeout = null;
+
+function showPlanning() {
+    planning.style.display = "block";
+    annivScreen.style.display = "none";
+    if (!hasAnniversaire) return;
+    clearTimeout(currentTimeout);
+    currentTimeout = setTimeout(showAnniversaires, DUREE_PLANNING);
+}
+
+function showAnniversaires() {
+    annivScreen.style.display = "flex";
+    planning.style.display = "none";
+    clearTimeout(currentTimeout);
+    currentTimeout = setTimeout(showPlanning, DUREE_ANNIV);
+}
+
+showPlanning();
+
+/* Confettis */
+if (hasAnniversaire) {
+    const canvas = document.getElementById("confetti-canvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const confettis = [];
+    for (let i = 0; i < 150; i++) {
+        confettis.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 6 + 4,
+            speed: Math.random() * 3 + 2,
+            color: `hsl(${Math.random() * 360}, 100%, 60%)`
+        });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        confettis.forEach(c => {
+            ctx.fillStyle = c.color;
+            ctx.fillRect(c.x, c.y, c.size, c.size);
+            c.y += c.speed;
+            if (c.y > canvas.height) {
+                c.y = -10;
+                c.x = Math.random() * canvas.width;
+            }
+        });
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+}
 </script>
 
 </body>
